@@ -1,0 +1,17 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Add New Allowance{% endblock %}
+
+{% block content %}
+<div class="whole-block">
+    <h1>Create Your Allowance Here!</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <h1>Allowance</h1>
+        {{ form }}
+        <h1>Expense</h1>
+        {{ form2 }}
+        <button type="submit">Create Allowance</button>
+    </form>
+</div>
+{% endblock %}
