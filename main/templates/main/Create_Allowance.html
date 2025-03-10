@@ -2,16 +2,29 @@
 
 {% block title %}Add New Allowance{% endblock %}
 
+{% block styles %}
+    <style>
+        .whole-block{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
 <div class="whole-block">
+    <!-- Header -->
     <h1>Create Your Allowance Here!</h1>
+
+    <!-- Forms -->
+    <div>
+
+    </div>
     <form method="POST">
         {% csrf_token %}
         <h1>Allowance</h1>
         {{ form }}
-        <h1>Expense</h1>
-        {{ form2 }}
-        <button type="submit">Create Allowance</button>
     </form>
 </div>
 {% endblock %}

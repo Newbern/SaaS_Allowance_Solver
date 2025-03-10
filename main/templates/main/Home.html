@@ -2,9 +2,24 @@
 
 {% block title %}Home Page{% endblock %}
 
+{% block styles %}
+    <style>
+        .whole-block{
+            display:flex;
+            flex-direction:column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+{% endblock%}
+
 {% block content %}
-    <div class="jumbotron">
+    <div class="whole-block">
         <h1>Welcome to SaaS Allowance Solver</h1>
         <p>Welcome to SaaS Allowance Solver</p>
+        <div style="display:flex; flex-direction: column;gap: 10px">
+            <a href="create-allowance/">Create New Allowance</a>
+            <a href="show-allowance/">Show All Allowances</a>
+        </div>
     </div>
 {% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Showing Allowance{% endblock %}
+
+{% block content %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <div>
+        <h1>Showing Allowance</h1>
+        <ul>
+            {% for item in lst %}
+                <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+        <div style="display:flex; width:500px; height:500px">
+        <canvas id="myChart" ></canvas></div>
+
+    <script>
+        fetch("{% url 'chart_data' %}",
+            {
+                "method": "GET",
+                "headers": {
+                    "content-type": "application/json",
+                    "X-CSRFToken": '{{ csrf_token }}'
+            }
+
+            })  // Fetch data from Django view
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',  // Change to 'pie' for a pie chart
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Expenses ($)',
+                        data: data.values,
+                        backgroundColor: 'rgb(0 150 255)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 300,
+                            ticks: {
+                                stepSize: 10
+                            }
+                        },
+                        x: {
+                            stacked: true
+                        }
+                    }
+                },
+            });
+        });
+    </script>
+
+
+
+    </div>
+{% endblock %}

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from main.models import *
 from main.forms import *
 
@@ -10,7 +11,6 @@ def home(request):
 
 # Create New Allowance
 def create(request):
-
     if request.method == "GET":
         # Collecting Forms
         form = AllowanceForm()
@@ -30,6 +30,39 @@ def create(request):
 
         return redirect(home)
 
+
+# Showing all Allowances
+def show(request):
+    if request.method == "GET":
+        lst = Allowance.objects.all()
+
+        return render(request, 'main/Show_Allowance.html', {"lst": lst})
+
+
+# Getting Chat Data
+def chart_data(request):
+
+    if request.method == "GET":
+        #Getting Data
+        # data = {
+        #     "labels": ["Food", "Rent", "Transport"],
+        #     "values": [300, 1000, 150]
+        # }
+
+        names_lst = []
+        values_lst = []
+        for i in Expense.objects.all():
+            names_lst.append(i.expense)
+            values_lst.append(i.limit)
+            if i.spending:
+                names_lst.append("spending")
+                values_lst.append(i.spending)
+        data = {
+            'labels': names_lst,
+            'values': values_lst
+        }
+
+        return JsonResponse(data)
 
 def settings(request):
     return render(request, 'main/Settings.html', {})
