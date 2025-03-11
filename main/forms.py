@@ -6,10 +6,11 @@ from main.models import *
 class AllowanceForm(forms.ModelForm):
     class Meta:
         model = Allowance
-        fields = ['default_allowance']
-        labels = {'default_allowance': ""}
+        fields = ['default_allowance', 'schedules']
+        labels = {'default_allowance': "", 'schedules': ""}
         widgets = {
-            'default_allowance': forms.NumberInput(attrs={'class': 'layouts'}),
+            'default_allowance': forms.NumberInput(attrs={'class': 'allowance-layouts'}),
+            'schedules': forms.Select(attrs={'class': 'allowance-layouts'}),
         }
 
 class AllowanceExpenseForm(forms.ModelForm):

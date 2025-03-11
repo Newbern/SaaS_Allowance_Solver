@@ -13,39 +13,50 @@ def home(request):
 def create(request):
     if request.method == "GET":
         # Collecting Forms
-        form = AllowanceForm(instance=Allowance.objects.filter(user=request.user).first())
-        form2 = []
-        for i in Expense.objects.all():
-            form2.append(AllowanceExpenseForm(instance=i))
+        # Getting Last Used Allowance
+        allowance = Allowance.objects.filter(user=request.user).last()
+
+        # Forms
+        form = AllowanceForm(instance=allowance)
+        form2 = [AllowanceExpenseForm(instance=item) for item in Expense.objects.filter(allowance=allowance)]
 
         return render(request, 'main/Create_Allowance.html', {"form": form, "form2": form2})
 
     elif request.method == "POST":
-        allowance = request.POST.getlist("default_allowance")
+        # Getting Values
+        allowance = request.POST.get("default_allowance")
+        schedules = request.POST.get('schedules')
         expense = request.POST.getlist('expense')
         expense_limit = request.POST.getlist('limit')
 
-        lst = zip(expense, expense_limit)
-        for i in lst:
-            print(i)
+        # Creating Allowance & Saving
+        new_allowance = Allowance(user=request.user, schedules=schedules, default_allowance=allowance)
+        new_allowance.save()
 
-        return redirect('home')
+        # Creating Expenses & Saving
+        for exp in zip(expense, expense_limit):
+            Expense(allowance=new_allowance, expense=exp[0], limit=exp[1]).save()
 
-        # new_allowance = Allowance.objects.create(user=request.user, default_allowance=allowance)
-        # new_expense = Expense.objects.create(allowance=new_allowance, expense=expense, limit=expense_limit)
-        #
-        # new_allowance.save()
-        # new_expense.save()
-        #
-        # return redirect(home)
+
+        return redirect(home)
 
 
 # Showing all Allowances
 def show(request):
     if request.method == "GET":
-        lst = Allowance.objects.all()
+        # First time Loading Page
+        if not request.GET.get("allowance-select"):
+            print("First Time Load")
+            allowance_lst = Allowance.objects.all()
+            return render(request, 'main/Show_Allowance.html', {"allowance_lst": allowance_lst})
 
-        return render(request, 'main/Show_Allowance.html', {"lst": lst})
+        else:
+            print("Second TIme Load")
+            print(request.GET.get("allowance-select"))
+            allowance_lst = Allowance.objects.all()
+            THIS = Expense.objects.filter(allowance=request.GET.get("allowance-select")).first()
+            return render(request, 'main/Show_Allowance.html', {"allowance_lst": allowance_lst, "THIS": THIS})
+
 
 
 # Getting Chat Data
@@ -63,12 +74,10 @@ def chart_data(request):
         for i in Expense.objects.all():
             names_lst.append(i.expense)
             values_lst.append(i.limit)
-            if i.spending:
-                names_lst.append("spending")
-                values_lst.append(i.spending)
         data = {
             'labels': names_lst,
-            'values': values_lst
+            'values': values_lst,
+            'color': 'rgb(0 150 255)'
         }
 
         return JsonResponse(data)

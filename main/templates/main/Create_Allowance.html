@@ -22,11 +22,12 @@
             margin-bottom: 5px
         }
 
-        .layouts{
+        .allowance-layouts{
             display: flex;
             font-size: x-large;
-            width: 100px;
+            width: 120px;
             text-align: center;
+            margin-bottom: 5px;
         }
         .expense-layouts{
             display:flex;
@@ -68,6 +69,7 @@
 
 {% block Javascript %}
     <script>
+        // Adding More Expense to Allowance
         function add_expense() {
             document.getElementById("expense").insertAdjacentHTML(
                 "beforeend",

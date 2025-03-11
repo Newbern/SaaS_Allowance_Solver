@@ -2,64 +2,89 @@
 
 {% block title %}Showing Allowance{% endblock %}
 
+{% block styles %}
+    <style>
+        .whole-block{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .graph-block{
+            display:flex;
+            width:500px;
+            height:500px
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <div>
+    <!-- Whole block -->
+    <div class="whole-block">
         <h1>Showing Allowance</h1>
-        <ul>
-            {% for item in lst %}
-                <li>{{ item }}</li>
-            {% endfor %}
-        </ul>
-        <div style="display:flex; width:500px; height:500px">
-        <canvas id="myChart" ></canvas></div>
 
-    <script>
-        fetch("{% url 'chart_data' %}",
-            {
-                "method": "GET",
-                "headers": {
-                    "content-type": "application/json",
-                    "X-CSRFToken": '{{ csrf_token }}'
-            }
+        <p>{{ allowance }}</p>
 
-            })  // Fetch data from Django view
-        .then(response => response.json())
-        .then(data => {
-            const ctx = document.getElementById('myChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',  // Change to 'pie' for a pie chart
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: 'Expenses ($)',
-                        data: data.values,
-                        backgroundColor: 'rgb(0 150 255)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 300,
-                            ticks: {
-                                stepSize: 10
-                            }
-                        },
-                        x: {
-                            stacked: true
-                        }
-                    }
-                },
-            });
-        });
-    </script>
-
-
+        <!-- Graph block -->
+        <div class="graph-block">
+            <canvas id="myChart" ></canvas>
+        </div>
 
     </div>
+{% endblock %}
+
+{% block Javascript %}
+
+    <script>
+        // Retrieving Chart Data
+        function Get_Chart_Data() {
+            // Retrieving Chart Data
+            fetch("{% url 'chart_data' %}",
+                {
+                    "method": "GET",
+                    "headers": {
+                        "content-type": "application/json",
+                        "X-CSRFToken": '{{ csrf_token }}'
+                    }
+                })
+            .then(response => response.json()) // Transferring data to json data
+            .then(data => {
+                const ctx = document.getElementById('myChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',  // Change for 'bar', 'pie' & 'line'
+                    data: {
+                        labels: data.labels, // Data Labels
+                        datasets: [{
+                            label: 'Expenses ($)', // Label
+                            data: data.values, // Data Values
+                            backgroundColor: data.color // Color
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 300,
+                                ticks: {
+                                    stepSize: 10
+                                }
+                            },
+                            x: {
+                                stacked: true
+                            }
+                        }
+                    },
+                });
+            });
+        }
+
+        // Loading Chart Data
+        Get_Chart_Data();
+    </script>
+
 {% endblock %}
