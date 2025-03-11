@@ -9,22 +9,77 @@
             flex-direction: column;
             align-items: center;
         }
+        .form-block{
+            display: flex;
+            flex-direction: column;
+            align-items:center;
+        }
+
+        .expense-block{
+            display: flex;
+            width: fit-content;
+            gap: 5px;
+            margin-bottom: 5px
+        }
+
+        .layouts{
+            display: flex;
+            font-size: x-large;
+            width: 100px;
+            text-align: center;
+        }
+        .expense-layouts{
+            display:flex;
+            font-size: large;
+            width: 100px;
+            text-align: center;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
 <div class="whole-block">
     <!-- Header -->
-    <h1>Create Your Allowance Here!</h1>
+    <h1>Create Allowance</h1>
 
-    <!-- Forms -->
-    <div>
-
-    </div>
-    <form method="POST">
+    <!-- Allowance Form -->
+    <form class="form-block" method="POST">
         {% csrf_token %}
+        <!-- Allowance -->
         <h1>Allowance</h1>
         {{ form }}
+
+        <!-- Expenses -->
+        <div id="expense" style="height:200px; overflow: auto;">
+            <h4 style="display:flex; justify-content: center; margin-bottom:5px">Expenses</h4>
+            {% for i in form2 %}
+                <div class="expense-block" >
+                    {{ i }}
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" onclick="add_expense()" style="width:100%">+ Add </button>
+        <button type="submit" style="width:100%">Submit</button>
     </form>
+
+
 </div>
+{% endblock %}
+
+{% block Javascript %}
+    <script>
+        function add_expense() {
+            document.getElementById("expense").insertAdjacentHTML(
+                "beforeend",
+                `<div class="expense-block">
+                        <div>
+                            <input type="text" name="expense" class="expense-layouts" maxlength="100" required="" id="id_expense">
+                        </div>
+                        <div>
+                            <input type="number" name="limit" class="expense-layouts" step="0.01" required="" id="id_limit">
+                        </div>
+                </div>`
+            )}
+
+    </script>
 {% endblock %}

@@ -13,22 +13,31 @@ def home(request):
 def create(request):
     if request.method == "GET":
         # Collecting Forms
-        form = AllowanceForm()
-        form2 = AllowanceExpenseForm()
+        form = AllowanceForm(instance=Allowance.objects.filter(user=request.user).first())
+        form2 = []
+        for i in Expense.objects.all():
+            form2.append(AllowanceExpenseForm(instance=i))
+
         return render(request, 'main/Create_Allowance.html', {"form": form, "form2": form2})
 
     elif request.method == "POST":
-        allowance = request.POST.get("default_allowance")
-        expense = request.POST.get('expense')
-        expense_limit = request.POST.get('limit')
+        allowance = request.POST.getlist("default_allowance")
+        expense = request.POST.getlist('expense')
+        expense_limit = request.POST.getlist('limit')
 
-        new_allowance = Allowance.objects.create(user=request.user, default_allowance=allowance)
-        new_expense = Expense.objects.create(allowance=new_allowance, expense=expense, limit=expense_limit)
+        lst = zip(expense, expense_limit)
+        for i in lst:
+            print(i)
 
-        new_allowance.save()
-        new_expense.save()
+        return redirect('home')
 
-        return redirect(home)
+        # new_allowance = Allowance.objects.create(user=request.user, default_allowance=allowance)
+        # new_expense = Expense.objects.create(allowance=new_allowance, expense=expense, limit=expense_limit)
+        #
+        # new_allowance.save()
+        # new_expense.save()
+        #
+        # return redirect(home)
 
 
 # Showing all Allowances
