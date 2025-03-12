@@ -47,4 +47,4 @@ class Expense(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.allowance} | {self.expense}"
+        return f"{self.allowance} | {self.expense} | {self.limit}"

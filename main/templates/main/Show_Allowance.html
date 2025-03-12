@@ -4,16 +4,30 @@
 
 {% block styles %}
     <style>
+        /* Whole block */
         .whole-block{
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            flex-direction: row;
+            justify-content: space-evenly;
         }
+
+        /* Left block */
+        .left-block{
+            display:flex;
+            flex-direction: column;
+            text-align: center;
+        }
+
         .graph-block{
             display:flex;
             width:500px;
             height:500px
+        }
+
+        .right-block{
+            display:flex;
+            flex-direction: column;
+            text-align: center;
         }
     </style>
 {% endblock %}
@@ -23,13 +37,24 @@
 
     <!-- Whole block -->
     <div class="whole-block">
-        <h1>Showing Allowance</h1>
 
-        <p>{{ allowance }}</p>
+        <div class="left-block">
+            <h1>{{ allowance.set_allowance }}</h1>
+            <h6 style="margin-block-start:0">{{ allowance.default_allowance }}</h6>
+        </div>
 
         <!-- Graph block -->
         <div class="graph-block">
             <canvas id="myChart" ></canvas>
+        </div>
+
+        <!-- Right block -->
+        <div class="right-block">
+            <a href="#">Home</a>
+            <a href="#">Overview</a>
+            <a href="#">History</a>
+            <a href="#">Edit</a>
+            <a href="#">Add</a>
         </div>
 
     </div>
@@ -57,7 +82,7 @@
                     data: {
                         labels: data.labels, // Data Labels
                         datasets: [{
-                            label: 'Expenses ($)', // Label
+                            label: data.schedule, // Label
                             data: data.values, // Data Values
                             backgroundColor: data.color // Color
                         }]
@@ -69,7 +94,7 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                max: 300,
+                                max: data.allowance,
                                 ticks: {
                                     stepSize: 10
                                 }

@@ -44,40 +44,27 @@ def create(request):
 # Showing all Allowances
 def show(request):
     if request.method == "GET":
-        # First time Loading Page
-        if not request.GET.get("allowance-select"):
-            print("First Time Load")
-            allowance_lst = Allowance.objects.all()
-            return render(request, 'main/Show_Allowance.html', {"allowance_lst": allowance_lst})
-
-        else:
-            print("Second TIme Load")
-            print(request.GET.get("allowance-select"))
-            allowance_lst = Allowance.objects.all()
-            THIS = Expense.objects.filter(allowance=request.GET.get("allowance-select")).first()
-            return render(request, 'main/Show_Allowance.html', {"allowance_lst": allowance_lst, "THIS": THIS})
-
+        allowance = Allowance.objects.filter(user=request.user).last()
+        return render(request, 'main/Show_Allowance.html', {"allowance": allowance})
 
 
 # Getting Chat Data
 def chart_data(request):
 
     if request.method == "GET":
-        #Getting Data
-        # data = {
-        #     "labels": ["Food", "Rent", "Transport"],
-        #     "values": [300, 1000, 150]
-        # }
+        allowance = Allowance.objects.filter(user=request.user).last()
 
         names_lst = []
         values_lst = []
-        for i in Expense.objects.all():
+        for i in Expense.objects.filter(allowance=allowance):
             names_lst.append(i.expense)
             values_lst.append(i.limit)
         data = {
             'labels': names_lst,
             'values': values_lst,
-            'color': 'rgb(0 150 255)'
+            'color': 'rgb(0 150 255)',
+            'allowance': int(allowance.default_allowance),
+            'schedule': allowance.schedules
         }
 
         return JsonResponse(data)
