@@ -18,10 +18,30 @@
             text-align: center;
         }
 
-        .graph-block{
+        .middle-block{
             display:flex;
+            flex-direction: column;
             width:500px;
-            height:500px
+            height:250px
+        }
+
+        .add-expense-block{
+            display:flex;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .transaction-block{
+            display:flex;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .transaction-block-2{
+            display:flex;
+            flex-direction: row;
+            justify-content: space-between;
+
         }
 
         .right-block{
@@ -43,9 +63,45 @@
             <h6 style="margin-block-start:0">{{ allowance.default_allowance }}</h6>
         </div>
 
-        <!-- Graph block -->
-        <div class="graph-block">
-            <canvas id="myChart" ></canvas>
+        <!-- Middle block -->
+        <div class="middle-block">
+            <!-- Graph Chart -->
+            <canvas id="myChart"></canvas>
+
+            <!-- Add Transaction -->
+            <div class="add-expense-block">
+                <h2>Add Expense</h2>
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Expense Type -->
+                    <select name="expense_name">
+                        {% for item in expense %}
+                            <option>{{ item.expense }}</option>
+                        {% endfor %}
+                    </select>
+                    <!-- Expense Description -->
+                    <input type="text" name="expense_description">
+
+                    <!-- Expense Amount -->
+                    <input type="number" step="0.01" name="expense_amount">
+
+                    <!-- Expense Button -->
+                    <button type="submit">Add</button>
+                </form>
+            </div>
+            <!-- Transactions -->
+            <div class="transaction-block">
+                {% for exp in expense %}
+                    {% for description, amount, date, time in exp.spending %}
+                        <div class="transaction-block-2">
+                            <p>{{ exp.expense }}</p>
+                            <p>{{ description }}</p>
+                            <p>${{ amount }}</p>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
         </div>
 
         <!-- Right block -->
@@ -81,11 +137,20 @@
                     type: 'bar',  // Change for 'bar', 'pie' & 'line'
                     data: {
                         labels: data.labels, // Data Labels
-                        datasets: [{
-                            label: data.schedule, // Label
-                            data: data.values, // Data Values
-                            backgroundColor: data.color // Color
-                        }]
+
+                        datasets: [
+                            {
+                                label: data.schedule, // Label
+                                data: data.values, // Data Values
+                                backgroundColor: data.color // Color
+                            },
+                            {
+                                label: data.schedule,
+                                data: data.limits,
+                                backgroundColor: 'rgb(255,25,25)'
+                            }
+                        ]
+
                     },
                     options: {
                         responsive: true,
@@ -93,13 +158,14 @@
 
                         scales: {
                             y: {
+                                stacked: true,
                                 beginAtZero: true,
                                 max: data.allowance,
                                 ticks: {
                                     stepSize: 10
                                 }
                             },
-                            x: {
+                            x:{
                                 stacked: true
                             }
                         }

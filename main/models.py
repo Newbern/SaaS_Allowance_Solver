@@ -36,7 +36,21 @@ class Expense(models.Model):
     expense = models.CharField(max_length=100)
     limit = models.DecimalField(max_digits=10, decimal_places=2)
     set = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    spending = ArrayField(models.DecimalField(max_digits=10, decimal_places=2), default=list, blank=True)
+    spending = models.JSONField(default=list, blank=True)
+
+    def add_entry(self, description, amount):
+        # Adding Spending item
+        current_spending = self.spending
+
+        # Getting Today's Current Date
+        date = str(datetime.today().date())
+
+        # Getting Time
+        time = str(datetime.today().time())
+
+        current_spending.append((description, amount, date, time))
+        self.spending = current_spending
+        self.save()
 
     # Saving Data
     def save(self, *args, **kwargs):

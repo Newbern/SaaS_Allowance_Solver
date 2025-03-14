@@ -2,7 +2,6 @@ from django import forms
 from main.models import *
 
 
-
 class AllowanceForm(forms.ModelForm):
     class Meta:
         model = Allowance
@@ -13,6 +12,7 @@ class AllowanceForm(forms.ModelForm):
             'schedules': forms.Select(attrs={'class': 'allowance-layouts'}),
         }
 
+
 class AllowanceExpenseForm(forms.ModelForm):
     class Meta:
         model = Expense
@@ -22,3 +22,7 @@ class AllowanceExpenseForm(forms.ModelForm):
             'expense': forms.TextInput(attrs={'class': 'expense-layouts'}),
             'limit': forms.NumberInput(attrs={'class': 'expense-layouts'}),
         }
+
+
+
+
