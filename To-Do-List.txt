@@ -1,0 +1,19 @@
+
+# Website
+    - Show Graph (Make Switch to Pie Chart with Percentages)
+    - Show Current Allowance & Previous
+    - Show Recent Transactions
+    -
+
+# Front-End
+    -
+
+# Back-End
+    - Linked Bank Account (FinTable)
+        - Connect to Google Sheet
+        - Connect to Banking
+
+    - Models
+        - Account
+        - Allowance
+        - Expenses

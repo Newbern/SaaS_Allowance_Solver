@@ -4,9 +4,11 @@ from main.models import *
 from main.forms import *
 from decimal import Decimal
 
+
 # Homepage
 def home(request):
     return render(request, 'main/Home.html', {})
+
 
 # Updating Data
 def update(request):
@@ -26,11 +28,65 @@ def update(request):
             expense.save()
 
             # Setting Allowance
-            item.set_allowance -= expense.set
+            item.set_allowance -= sum([Decimal(item[1]) for item in expense.spending])
             item.save()
 
 
+# Getting Chat Data
+def chart_data(request):
 
+    if request.method == "GET":
+        allowance = Allowance.objects.filter(user=request.user).last()
+
+        names_lst = []
+        values_lst = []
+        limits_lst = []
+        for i in Expense.objects.filter(allowance=allowance):
+            names_lst.append(i.expense)
+            values_lst.append(i.set)
+            limits_lst.append((i.limit - i.set))
+        data = {
+            'labels': names_lst,
+            'saved': values_lst,
+            'spent': limits_lst,
+            'color': 'rgb(0 150 255)',
+            'allowance': int(allowance.default_allowance),
+            'schedule': allowance.schedules
+        }
+
+        return JsonResponse(data)
+
+# Getting Transactions Data
+
+
+# Showing all Allowances
+def show(request):
+    update(request)
+    if request.method == "GET":
+        # Getting Allowance
+        allowance = Allowance.objects.filter(user=request.user).last()
+
+        # Getting Expense Spent
+        expense = Expense.objects.filter(allowance=allowance)
+
+        # Loading Page
+        return render(request, 'main/Show_Allowance.html', {"allowance": allowance, "expense": expense})
+
+    elif request.method == "POST":
+        # Getting Allowance
+        allowance = Allowance.objects.filter(user=request.user).last()
+
+        # Getting Expense
+        expense_name = request.POST.get('expense_name')
+        expense = Expense.objects.get(allowance=allowance, expense=expense_name)
+
+        # Getting Values
+        expense_description = request.POST.get('expense_description')
+        expense_amount = request.POST.get('expense_amount')
+        # Adding Spending Cost
+        expense.add_entry(expense_description, expense_amount)
+
+        return redirect(show)
 
 
 # Create New Allowance
@@ -65,59 +121,13 @@ def create(request):
         return redirect(home)
 
 
-# Showing all Allowances
-def show(request):
-    update(request)
-    if request.method == "GET":
-        # Getting Allowance
-        allowance = Allowance.objects.filter(user=request.user).last()
-
-        # Getting Expense Spent
-        expense = Expense.objects.filter(allowance=allowance)
-
-        # Loading Page
-        return render(request, 'main/Show_Allowance.html', {"allowance": allowance, "expense": expense})
-
-    elif request.method == "POST":
-        # Getting Allowance
-        allowance = Allowance.objects.filter(user=request.user).last()
-
-        # Getting Expense
-        expense_name = request.POST.get('expense_name')
-        expense = Expense.objects.get(allowance=allowance, expense=expense_name)
-
-        # Getting Values
-        expense_description = request.POST.get('expense_description')
-        expense_amount = request.POST.get('expense_amount')
-        # Adding Spending Cost
-        expense.add_entry(expense_description, expense_amount)
-
-        return redirect(show)
-
-
-# Getting Chat Data
-def chart_data(request):
-
-    if request.method == "GET":
-        allowance = Allowance.objects.filter(user=request.user).last()
-
-        names_lst = []
-        values_lst = []
-        limits_lst = []
-        for i in Expense.objects.filter(allowance=allowance):
-            names_lst.append(i.expense)
-            values_lst.append(i.set)
-            limits_lst.append((i.limit - i.set))
-        data = {
-            'labels': names_lst,
-            'values': values_lst,
-            'limits': limits_lst,
-            'color': 'rgb(0 150 255)',
-            'allowance': int(allowance.default_allowance),
-            'schedule': allowance.schedules
-        }
-
-        return JsonResponse(data)
-
+# Settings
 def settings(request):
     return render(request, 'main/Settings.html', {})
+
+
+
+
+
+
+
