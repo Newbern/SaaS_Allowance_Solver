@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'main.apps.MainConfig',
+    'Banking_Api.apps.BankingApiConfig'
 ]
 
 MIDDLEWARE = [
@@ -129,3 +130,26 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+
+
+
+
+
+
+
+
+import environ
+import os
+
+# Load environment variables
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+# Plaid API Configuration
+PLAID_CLIENT_ID = env('PLAID_CLIENT_ID')
+PLAID_SECRET = env('PLAID_SECRET')
+PLAID_ENV = env('PLAID_ENV', default='sandbox')
