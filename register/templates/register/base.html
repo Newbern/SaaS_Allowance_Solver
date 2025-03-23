@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Title{% endblock %}</title>
+    <style>
+        .whole-block{
+            display:flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .center-block{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid black;
+            border-radius: 16px;
+            padding: 10px;
+        }
+        .test{
+
+        }
+        .form-block{
+            display:flex;
+            flex-direction: column;
+            gap: 10px
+        }
+    </style>
+</head>
+<body>
+    <div class="whole-block">
+        <div class="center-block">
+            <form class="form-block" method="POST">
+                {% csrf_token %}
+                {{ form }}
+                <button type="submit">{% block sub-btn %}{% endblock %}</button>
+                {% if messages %}
+                    {% for message in messages %}
+                        <p style="color:red">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+                <p>{% block link-txt %}{% endblock %} <a href="{% block link %}{% endblock %}">Here</a>!</p>
+
+            </form>
+        </div>
+    </div>
+</body>
+</html>

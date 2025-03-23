@@ -15,7 +15,14 @@
 
 {% block content %}
     <div class="whole-block">
-        <h1>Welcome to SaaS Allowance Solver</h1>
+        <h1>Welcome
+            {% if user.is_authenticated %}
+                Back, {{ user }}
+            {% else %}
+                to Saas Allowance Solver
+            {% endif %}
+            !</h1>
+
         <p>Welcome to SaaS Allowance Solver</p>
         <div style="display:flex; flex-direction: column;gap: 10px">
             <a href="create-allowance/">Create New Allowance</a>

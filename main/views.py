@@ -7,7 +7,7 @@ from decimal import Decimal
 
 # Homepage
 def home(request):
-    return render(request, 'main/Home.html', {})
+    return render(request, 'main/Home.html', {'user':request.user})
 
 
 # Updating Data

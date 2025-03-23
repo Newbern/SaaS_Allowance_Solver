@@ -21,5 +21,6 @@ from django.contrib import admin
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("main.urls")),
-    path("", include("Banking_Api.urls"))
+    path("", include("Banking_Api.urls")),
+    path("", include("register.urls")),
 ]
