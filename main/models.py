@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from datetime import datetime
+from decimal import Decimal
 
 
 # Create your models here.
@@ -33,32 +34,18 @@ class Allowance(models.Model):
 
 class Expense(models.Model):
     allowance = models.ForeignKey(Allowance, on_delete=models.CASCADE)
-    expense = models.CharField(max_length=100)
-    limit = models.DecimalField(max_digits=10, decimal_places=2)
-    set = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    spending = models.JSONField(default=list, blank=True)
+    spending = models.JSONField(default=dict, blank=True)
 
-    def add_entry(self, description, amount):
-        # Adding Spending item
-        current_spending = self.spending
+    def add_expense(self, expense, limit):
+        data = {expense: {"limit": str(round(Decimal(limit), 2)), "set": str(round(Decimal(limit), 2)), "item": {}}}
+        self.spending.update(data)
 
-        # Getting Today's Current Date
+    def add_spending(self, expense, description, amount):
         date = str(datetime.today().date())
-
-        # Getting Time
         time = str(datetime.today().time())
-
-        current_spending.append((description, amount, date, time))
-        self.spending = current_spending
-        self.save()
-
-    # Saving Data
-    def save(self, *args, **kwargs):
-        # If The Set  is None then Change Value to limit
-        if self.set is None:
-            self.set = self.limit
-        # Saving
-        super().save(*args, **kwargs)
+        self.spending[expense]['item'].update({description: {"amount": str(round(Decimal(amount), 2)), "date": date, "time": time}})
+        super().save()
 
     def __str__(self):
-        return f"{self.allowance} | {self.expense} | {self.limit}"
+        return f"{self.allowance} | {[expense for expense in self.spending]}"
+

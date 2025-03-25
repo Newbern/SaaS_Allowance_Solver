@@ -13,16 +13,9 @@ class AllowanceForm(forms.ModelForm):
         }
 
 
-class AllowanceExpenseForm(forms.ModelForm):
-    class Meta:
-        model = Expense
-        fields = ['expense', 'limit']
-        labels = {'expense': "", 'limit': ""}
-        widgets = {
-            'expense': forms.TextInput(attrs={'class': 'expense-layouts'}),
-            'limit': forms.NumberInput(attrs={'class': 'expense-layouts'}),
-        }
-
+class AllowanceExpenseForm(forms.Form):
+    expense = forms.CharField(widget=forms.TextInput(attrs={'class': 'expense-layouts'}), label="")
+    limit = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'expense-layouts'}), label="", decimal_places=2)
 
 
 

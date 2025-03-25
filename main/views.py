@@ -7,6 +7,15 @@ from decimal import Decimal
 
 # Homepage
 def home(request):
+    allowance = Allowance.objects.filter(user=request.user).first()
+    expense = Expense.objects.filter(allowance=allowance).first()
+
+    #expense.add_spending("Extra", "Walmart", 21.86)
+
+    for item in expense.spending:
+        print(expense.spending[item]['item'])
+
+
     return render(request, 'main/Home.html', {'user':request.user})
 
 
@@ -24,12 +33,19 @@ def update(request):
     for item in allowance:
         for expense in Expense.objects.filter(allowance=item):
             # Setting Expense
-            expense.set = expense.limit - sum([Decimal(item[1]) for item in expense.spending])
-            expense.save()
+            #expense.set = expense.limit - sum([Decimal(item[1]) for item in expense.spending])
+            #expense.save()
 
-            # Setting Allowance
-            item.set_allowance -= sum([Decimal(item[1]) for item in expense.spending])
+            # Going Through Each Expanse
+            for exp in expense.spending:
+                expense.spending[exp]['set'] = expense.spending[exp]['limit'] - sum([Decimal(amount) for amount in expense.spending[exp]['amount']])
+
+                # Setting Allowance
+                item.set_allowance -= sum([Decimal(amount) for amount in expense.spending[exp]['amount']])
+
+            # Saving Allowance & Expense
             item.save()
+            expense.save()
 
 
 # Getting Chat Data
@@ -41,7 +57,7 @@ def chart_data(request):
         names_lst = []
         values_lst = []
         limits_lst = []
-        for i in Expense.objects.filter(allowance=allowance):
+        for i in Expense.objects.filter(allowance=allowance).order_by('expense'):
             names_lst.append(i.expense)
             values_lst.append(i.set)
             limits_lst.append((i.limit - i.set))
@@ -66,8 +82,13 @@ def show(request):
         # Getting Allowance
         allowance = Allowance.objects.filter(user=request.user).last()
 
-        # Getting Expense Spent
-        expense = Expense.objects.filter(allowance=allowance)
+        # Getting Expense
+        expense = Expense.objects.filter(allowance=allowance).first()
+
+        expense_lst = []
+        for exp in expense.spending:
+            expense_lst.append([expense.spending[exp], expense.spending[exp]['description']])
+
 
         # Loading Page
         return render(request, 'main/Show_Allowance.html', {"allowance": allowance, "expense": expense})
@@ -84,7 +105,7 @@ def show(request):
         expense_description = request.POST.get('expense_description')
         expense_amount = request.POST.get('expense_amount')
         # Adding Spending Cost
-        expense.add_entry(expense_description, expense_amount)
+        #expense.add_entry(expense_description, expense_amount)
 
         return redirect(show)
 
@@ -92,13 +113,17 @@ def show(request):
 # Create New Allowance
 def create(request):
     if request.method == "GET":
-        # Collecting Forms
-        # Getting Last Used Allowance
         allowance = Allowance.objects.filter(user=request.user).last()
+        # Collecting Forms
+        # Getting Previous Allowance Expenses
+        if allowance:
+            form = AllowanceForm(instance=allowance)
+            form2 = [AllowanceExpenseForm()]
 
-        # Forms
-        form = AllowanceForm(instance=allowance)
-        form2 = [AllowanceExpenseForm(instance=item) for item in Expense.objects.filter(allowance=allowance)]
+        # Creating New Allowance Forms
+        else:
+            form = AllowanceForm()
+            form2 = [AllowanceExpenseForm()]
 
         return render(request, 'main/Create_Allowance.html', {"form": form, "form2": form2})
 
@@ -114,8 +139,11 @@ def create(request):
         new_allowance.save()
 
         # Creating Expenses & Saving
-        for exp in zip(expense, expense_limit):
-            Expense(allowance=new_allowance, expense=exp[0], limit=exp[1]).save()
+        expense_obj = Expense.objects.create(allowance=new_allowance)
+        for expense, limit in zip(expense, expense_limit):
+            expense_obj.add_expense(expense, limit)
+
+        expense_obj.save()
 
 
         return redirect(home)
