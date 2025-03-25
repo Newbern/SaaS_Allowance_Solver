@@ -41,7 +41,7 @@ def chart_data(request):
         names_lst = []
         values_lst = []
         limits_lst = []
-        for i in Expense.objects.filter(allowance=allowance):
+        for i in Expense.objects.filter(allowance=allowance).order_by('expense'):
             names_lst.append(i.expense)
             values_lst.append(i.set)
             limits_lst.append((i.limit - i.set))
@@ -67,7 +67,7 @@ def show(request):
         allowance = Allowance.objects.filter(user=request.user).last()
 
         # Getting Expense Spent
-        expense = Expense.objects.filter(allowance=allowance)
+        expense = Expense.objects.filter(allowance=allowance).order_by('expense')
 
         # Loading Page
         return render(request, 'main/Show_Allowance.html', {"allowance": allowance, "expense": expense})

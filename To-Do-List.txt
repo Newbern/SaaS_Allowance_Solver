@@ -13,7 +13,34 @@
         - Connect to Google Sheet
         - Connect to Banking
 
+    - Register
+        - Fix Email Address Signup page
+
     - Models
         - Account
         - Allowance
         - Expenses
+
+
+
+----- To-Do List ------
+- Things to Think about
+    - Rearrange Database to One Expense Item
+    - Plaid Banking worth it?
+    - Google Sheet Upload Data?
+    - Look over Chart.js Data
+
+- Show-allowance
+    - FrontEnd
+        - Description input (text only?)
+        - Delete Expense item
+        - Edit Expense item
+        - Confirm page Pop up ?
+        - Edit Allowance
+        - Change Color Settings?
+    - BackEnd
+        - Arrange Items from Dates
+
+- Overview
+
+-
