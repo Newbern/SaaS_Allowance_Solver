@@ -10,10 +10,7 @@ def home(request):
     allowance = Allowance.objects.filter(user=request.user).first()
     expense = Expense.objects.filter(allowance=allowance).first()
 
-    #expense.add_spending("Extra", "Walmart", 21.86)
 
-    for item in expense.spending:
-        print(expense.spending[item]['item'])
 
 
     return render(request, 'main/Home.html', {'user':request.user})
@@ -36,12 +33,18 @@ def update(request):
             #expense.set = expense.limit - sum([Decimal(item[1]) for item in expense.spending])
             #expense.save()
 
-            # Going Through Each Expanse
+            # Going Through Each Expense
             for exp in expense.spending:
-                expense.spending[exp]['set'] = expense.spending[exp]['limit'] - sum([Decimal(amount) for amount in expense.spending[exp]['amount']])
+                # Every Expense amount
+                spending = sum([Decimal(expense.spending[exp]["item"][name]["amount"]) for name in expense.spending[exp]["item"]])
+
+                print(type(spending), spending)
+
+                # Setting Current Expense
+                expense.spending[exp]['set'] = str(Decimal(expense.spending[exp]['limit']) - spending)
 
                 # Setting Allowance
-                item.set_allowance -= sum([Decimal(amount) for amount in expense.spending[exp]['amount']])
+                item.set_allowance -= spending
 
             # Saving Allowance & Expense
             item.save()
@@ -53,18 +56,20 @@ def chart_data(request):
 
     if request.method == "GET":
         allowance = Allowance.objects.filter(user=request.user).last()
+        expense = Expense.objects.filter(allowance=allowance).first()
 
         names_lst = []
         values_lst = []
-        limits_lst = []
-        for i in Expense.objects.filter(allowance=allowance).order_by('expense'):
-            names_lst.append(i.expense)
-            values_lst.append(i.set)
-            limits_lst.append((i.limit - i.set))
+        spent_lst = []
+        for exp in expense.spending:
+            spending = expense.spending[exp]
+            names_lst.append(exp)
+            values_lst.append((Decimal(spending["set"])))
+            spent_lst.append((Decimal(spending["limit"]) - Decimal(spending["set"])))
         data = {
             'labels': names_lst,
             'saved': values_lst,
-            'spent': limits_lst,
+            'spent': spent_lst,
             'color': 'rgb(0 150 255)',
             'allowance': int(allowance.default_allowance),
             'schedule': allowance.schedules
@@ -77,7 +82,9 @@ def chart_data(request):
 
 # Showing all Allowances
 def show(request):
+    # Update Allowance & Expenses
     update(request)
+
     if request.method == "GET":
         # Getting Allowance
         allowance = Allowance.objects.filter(user=request.user).last()
@@ -87,7 +94,12 @@ def show(request):
 
         expense_lst = []
         for exp in expense.spending:
-            expense_lst.append([expense.spending[exp], expense.spending[exp]['description']])
+            items_lst = []
+            for name in expense.spending[exp]["item"]:
+                spending = expense.spending[exp]["item"][name]
+                items_lst.append([expense.spending[exp], spending, spending["amount"]])
+            expense_lst.append(items_lst)
+
 
 
         # Loading Page

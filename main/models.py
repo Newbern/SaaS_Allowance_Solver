@@ -37,13 +37,13 @@ class Expense(models.Model):
     spending = models.JSONField(default=dict, blank=True)
 
     def add_expense(self, expense, limit):
-        data = {expense: {"limit": str(round(Decimal(limit), 2)), "set": str(round(Decimal(limit), 2)), "item": {}}}
+        data = {expense: {"limit": limit, "set": limit, "item": {}}}
         self.spending.update(data)
 
     def add_spending(self, expense, description, amount):
         date = str(datetime.today().date())
         time = str(datetime.today().time())
-        self.spending[expense]['item'].update({description: {"amount": str(round(Decimal(amount), 2)), "date": date, "time": time}})
+        self.spending[expense]['item'].update({description: {"amount": amount, "date": date, "time": time}})
         super().save()
 
     def __str__(self):

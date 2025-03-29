@@ -76,10 +76,35 @@
 
                     <!-- Expense Type -->
                     <select name="expense_name">
-                        {% for item in expense %}
-                            <option>{{ item.expense }}</option>
-                        {% endfor %}
+{#                        {% for item in expense %}#}
+{#                            <option>{{ item }}</option>#}
+{#                        {% endfor %}#}
                     </select>
+
+
+
+
+                    <p>
+                        {% for exp, val in expense.spending.items %}
+                            {% for item, y in val.items %}
+                                {% if item == "item" %}
+                                    {% for x, g in y.items %}
+                                        {{ exp }}
+                                        {{ x }}
+                                        {% for a, b in g.items%}
+                                            {% if a == "amount" %}
+                                                {{ b }}
+                                            {% endif %}
+                                            {% endfor %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}</p>
+
+
+
+
+
                     <!-- Expense Description -->
                     <input type="text" name="expense_description" placeholder="Description">
 
@@ -92,15 +117,15 @@
             </div>
             <!-- Transactions -->
             <div class="transaction-block">
-                {% for exp in expense %}
-                    {% for description, amount, date, time in exp.spending %}
-                        <div class="transaction-block-2">
-                            <p>{{ exp.expense }}</p>
-                            <p>{{ description }}</p>
-                            <p>${{ amount }}</p>
-                        </div>
-                    {% endfor %}
-                {% endfor %}
+{#                {% for exp in expense %}#}
+{#                    {% for description, amount, date, time in exp.spending %}#}
+{#                        <div class="transaction-block-2">#}
+{#                            <p>{{ exp.expense }}</p>#}
+{#                            <p>{{ description }}</p>#}
+{#                            <p>${{ amount }}</p>#}
+{#                        </div>#}
+{#                    {% endfor %}#}
+{#                {% endfor %}#}
             </div>
         </div>
 
