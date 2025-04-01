@@ -13,9 +13,29 @@ class AllowanceForm(forms.ModelForm):
         }
 
 
-class AllowanceExpenseForm(forms.Form):
+# class AllowanceExpenseForm(forms.ModelForm):
+#     expense = forms.CharField(widget=forms.TextInput(attrs={'class': 'expense-layouts'}), label="")
+#     limit = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'expense-layouts'}), label="", decimal_places=2)
+
+class AllowanceExpenseForm(forms.ModelForm):
     expense = forms.CharField(widget=forms.TextInput(attrs={'class': 'expense-layouts'}), label="")
     limit = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'expense-layouts'}), label="", decimal_places=2)
+
+    class Meta:
+        model = Expense
+        fields = ['expense', 'limit']
+
+    def __init__(self, *args, data=None, **kwargs):
+        super(AllowanceExpenseForm, self).__init__(*args, **kwargs)
+
+        if data:
+            self.fields['expense'].initial = data['name']
+            self.fields['limit'].initial = data['limit']
+
+
+
+
+
 
 
 

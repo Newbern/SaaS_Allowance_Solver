@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from pefile import allowed_function_name
+
 from main.models import *
 from main.forms import *
 from decimal import Decimal
@@ -7,13 +9,7 @@ from decimal import Decimal
 
 # Homepage
 def home(request):
-    allowance = Allowance.objects.filter(user=request.user).first()
-    expense = Expense.objects.filter(allowance=allowance).first()
-
-
-
-
-    return render(request, 'main/Home.html', {'user':request.user})
+    return render(request, 'main/Home.html', {'user': request.user})
 
 
 # Updating Data
@@ -37,8 +33,6 @@ def update(request):
             for exp in expense.spending:
                 # Every Expense amount
                 spending = sum([Decimal(expense.spending[exp]["item"][name]["amount"]) for name in expense.spending[exp]["item"]])
-
-                print(type(spending), spending)
 
                 # Setting Current Expense
                 expense.spending[exp]['set'] = str(Decimal(expense.spending[exp]['limit']) - spending)
@@ -64,8 +58,10 @@ def chart_data(request):
         for exp in expense.spending:
             spending = expense.spending[exp]
             names_lst.append(exp)
-            values_lst.append((Decimal(spending["set"])))
-            spent_lst.append((Decimal(spending["limit"]) - Decimal(spending["set"])))
+            values_lst.append(Decimal(spending["set"]))
+            spent_lst.append(Decimal(spending["limit"]) - Decimal(spending["set"]))
+
+
         data = {
             'labels': names_lst,
             'saved': values_lst,
@@ -76,8 +72,6 @@ def chart_data(request):
         }
 
         return JsonResponse(data)
-
-# Getting Transactions Data
 
 
 # Showing all Allowances
@@ -108,16 +102,20 @@ def show(request):
     elif request.method == "POST":
         # Getting Allowance
         allowance = Allowance.objects.filter(user=request.user).last()
-
         # Getting Expense
-        expense_name = request.POST.get('expense_name')
-        expense = Expense.objects.get(allowance=allowance, expense=expense_name)
+        expense = Expense.objects.filter(allowance=allowance).first()
 
         # Getting Values
+        expense_name = request.POST.get('expense_name')
         expense_description = request.POST.get('expense_description')
         expense_amount = request.POST.get('expense_amount')
+
+        # If there is an error in getting the description or amount   (NOT WORKING)
+        if expense_description or expense_amount is None:
+            redirect(show)
+
         # Adding Spending Cost
-        #expense.add_entry(expense_description, expense_amount)
+        expense.add_spending(expense_name, expense_description, expense_amount)
 
         return redirect(show)
 
@@ -126,11 +124,12 @@ def show(request):
 def create(request):
     if request.method == "GET":
         allowance = Allowance.objects.filter(user=request.user).last()
+        expense = Expense.objects.filter(allowance=allowance).first()
         # Collecting Forms
         # Getting Previous Allowance Expenses
         if allowance:
             form = AllowanceForm(instance=allowance)
-            form2 = [AllowanceExpenseForm()]
+            form2 = [(AllowanceExpenseForm(data={'name': name, 'limit': data['limit']})) for name, data in expense.spending.items()]
 
         # Creating New Allowance Forms
         else:
@@ -159,6 +158,89 @@ def create(request):
 
 
         return redirect(home)
+
+
+def history(request):
+    if request.method == "GET":
+        # Getting Allowance
+        allowance = Allowance.objects.all()
+
+        # Getting Saved & Spent Total
+        # Setting up Percentages Allowance
+        limit = saved = spent = 0
+        for item in allowance:
+            limit += item.default_allowance
+            saved += item.set_allowance
+            spent += (item.default_allowance - item.set_allowance)
+
+        # Rounding Percentages
+        saved_pre = f"Saved: {round(saved / limit * 100, 2)}% (${saved})"
+        spent_pre = f"Spent: {round(spent / limit * 100, 2)}% (${spent})"
+
+
+        # Getting Expenses Percentages
+        saved_lst = []
+        find_lst = []
+        for item in allowance:
+            expense_data = Expense.objects.filter(allowance=item).first().spending
+            for exp, data in expense_data.items():
+                find_lst.append(exp)
+                items = data.get('item', {})
+                saved_lst.extend([[exp, name, items[name]['amount']] for name in items])
+
+        # Adding Duplicates together
+        from collections import defaultdict
+        merged = defaultdict(lambda: Decimal("0.0"))
+
+        # Merging
+        for exp, name, amount in saved_lst:
+            key = (exp, name)
+            merged[key] += Decimal(amount)
+
+        # Reformating List
+        saved_lst = []
+        spent_lst = []
+        for expense in merged:
+            saved_lst.append([expense, f"${merged[expense]}", f"{round(merged[expense] / saved * 100, 2)}%"])
+            spent_lst.append([expense, f"${merged[expense]}", f"{round(merged[expense] / spent * 100, 2)}%"])
+
+
+        """ 
+        Create a saved_lst for the Saved money
+        
+        Create a Spent_lst for the Spent Money
+        
+        You need to set up the Front end to place this data
+        
+        You will need to set up the amount and precentage all back here
+        
+        Still have alot to do right here :(
+        
+        """
+        return render(request, 'main/History.html', {"saved": saved_pre, "spent": spent_pre, "expense": sorted(merged), 'saved_lst': sorted(saved_lst), 'spent_lst': sorted(spent_lst)})
+
+def chart_history_data(request):
+    if request.method == "GET":
+        allowance = reversed(Allowance.objects.all())
+
+        names_lst = []
+        values_lst = []
+        spent_lst = []
+        for item in allowance:
+            names_lst.append(item.date)
+            values_lst.append(item.set_allowance)
+            spent_lst.append(item.default_allowance - item.set_allowance)
+
+
+        data = {
+            'labels': names_lst,
+            'saved': values_lst,
+            'spent': spent_lst,
+            'color': 'rgb(0 150 255)'
+        }
+
+        return JsonResponse(data)
+
 
 
 # Settings

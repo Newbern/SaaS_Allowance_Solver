@@ -1,6 +1,6 @@
 {% extends 'main/base.html' %}
 
-{% block title %}Showing Allowance{% endblock %}
+{% block title %}History{% endblock %}
 
 {% block styles %}
     <style>
@@ -67,57 +67,16 @@
         <div class="middle-block">
             <!-- Graph Chart -->
             <canvas id="myChart"></canvas>
-
-            <!-- Add Transaction -->
-            <div class="add-expense-block">
-                <h2>Add Expense</h2>
-                <form method="post">
-                    {% csrf_token %}
-
-                    <!-- Expense Type -->
-                    <select name="expense_name">
-                        {% for exp, args in expense.spending.items %}
-                            <option>{{ exp }}</option>
-                        {% endfor %}
-                    </select>
-
-                    <!-- Expense Description -->
-                    <input type="text" name="expense_description" id="expense_description" placeholder="Description">
-
-                    <!-- Expense Amount -->
-                    <input type="number" step="0.01" name="expense_amount" placeholder="Amount">
-
-                    <!-- Expense Button -->
-                    <button type="submit">Add</button>
-                </form>
-            </div>
-            <!-- Transactions -->
-            <div class="transaction-block">
-                    {% for exp, data in expense.spending.items %}
-                        {% for name, item in data.items %}
-                            {% if name == "item" %}
-                                {% for spending, spending_data in item.items %}
-                                    {% for item_name, item_data in spending_data.items %}
-                                        {% if item_name == "amount" %}
-                                            <div class="transaction-block-2">
-                                                <!-- Expense -->
-                                                <p>{{ exp }}</p>
-
-                                                <!-- Description -->
-                                                <p>{{ spending }}</p>
-
-                                                <!-- Amount -->
-                                                <p>${{ item_data }}</p>
-                                            </div>
-
-
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endfor %}
-                            {% endif %}
-                        {% endfor %}
-                    {% endfor %}
-
+            <!-- Percentages -->
+            <div>
+                <h2>{{ saved }}</h2>
+                {% for item in saved_lst %}
+                    <p>{{ item }}</p>
+                {% endfor %}
+                <h2>{{ spent }}</h2>
+                {% for item in spent_lst %}
+                    <p>{{ item }}</p>
+                {% endfor %}
             </div>
         </div>
 
@@ -134,12 +93,11 @@
 {% endblock %}
 
 {% block Javascript %}
-
     <script>
         // Retrieving Chart Data
         function Get_Chart_Data() {
             // Retrieving Chart Data
-            fetch("{% url 'chart_data' %}",
+            fetch("{% url 'chart_history_data' %}",
                 {
                     "method": "GET",
                     "headers": {
@@ -177,7 +135,7 @@
                             y: {
                                 stacked: true,
                                 beginAtZero: true,
-                                max: data.allowance,
+                                max: 300,
                                 ticks: {
                                     stepSize: 10,
                                     callback: function(value) {
@@ -197,14 +155,7 @@
         // Loading Chart Data
         Get_Chart_Data();
 
-        // No Numbers in Expense Description Input
-        document.getElementById("expense_description").addEventListener("keypress", function(event) {
-            if (/\d/.test(event.key)) {
-                event.preventDefault();
-            }
-        })
 
 
     </script>
-
 {% endblock %}

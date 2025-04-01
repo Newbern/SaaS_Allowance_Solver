@@ -53,9 +53,9 @@
         <!-- Expenses -->
         <div id="expense" style="height:200px; overflow: auto;">
             <h4 style="display:flex; justify-content: center; margin-bottom:5px">Expenses</h4>
-            {% for i in form2 %}
+            {% for item in form2 %}
                 <div class="expense-block" >
-                    {{ i }}
+                    {{ item }}
                 </div>
             {% endfor %}
         </div>
