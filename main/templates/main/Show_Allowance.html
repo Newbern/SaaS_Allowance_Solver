@@ -76,34 +76,10 @@
 
                     <!-- Expense Type -->
                     <select name="expense_name">
-{#                        {% for item in expense %}#}
-{#                            <option>{{ item }}</option>#}
-{#                        {% endfor %}#}
+                        {% for exp, args in expense.spending.items %}
+                            <option>{{ exp }}</option>
+                        {% endfor %}
                     </select>
-
-
-
-
-                    <p>
-                        {% for exp, val in expense.spending.items %}
-                            {% for item, y in val.items %}
-                                {% if item == "item" %}
-                                    {% for x, g in y.items %}
-                                        {{ exp }}
-                                        {{ x }}
-                                        {% for a, b in g.items%}
-                                            {% if a == "amount" %}
-                                                {{ b }}
-                                            {% endif %}
-                                            {% endfor %}
-                                    {% endfor %}
-                                {% endif %}
-                            {% endfor %}
-                        {% endfor %}</p>
-
-
-
-
 
                     <!-- Expense Description -->
                     <input type="text" name="expense_description" placeholder="Description">
@@ -117,15 +93,31 @@
             </div>
             <!-- Transactions -->
             <div class="transaction-block">
-{#                {% for exp in expense %}#}
-{#                    {% for description, amount, date, time in exp.spending %}#}
-{#                        <div class="transaction-block-2">#}
-{#                            <p>{{ exp.expense }}</p>#}
-{#                            <p>{{ description }}</p>#}
-{#                            <p>${{ amount }}</p>#}
-{#                        </div>#}
-{#                    {% endfor %}#}
-{#                {% endfor %}#}
+                    {% for exp, data in expense.spending.items %}
+                        {% for name, item in data.items %}
+                            {% if name == "item" %}
+                                {% for spending, spending_data in item.items %}
+                                    {% for item_name, item_data in spending_data.items %}
+                                        {% if item_name == "amount" %}
+                                            <div class="transaction-block-2">
+                                                <!-- Expense -->
+                                                <p>{{ exp }}</p>
+
+                                                <!-- Description -->
+                                                <p>{{ spending }}</p>
+
+                                                <!-- Amount -->
+                                                <p>${{ item_data }}</p>
+                                            </div>
+
+
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+
             </div>
         </div>
 
@@ -187,7 +179,10 @@
                                 beginAtZero: true,
                                 max: data.allowance,
                                 ticks: {
-                                    stepSize: 10
+                                    stepSize: 10,
+                                    callback: function(value) {
+                                        return value.toString();
+                                    }
                                 }
                             },
                             x:{

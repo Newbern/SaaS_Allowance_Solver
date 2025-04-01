@@ -7,13 +7,7 @@ from decimal import Decimal
 
 # Homepage
 def home(request):
-    allowance = Allowance.objects.filter(user=request.user).first()
-    expense = Expense.objects.filter(allowance=allowance).first()
-
-
-
-
-    return render(request, 'main/Home.html', {'user':request.user})
+    return render(request, 'main/Home.html', {'user': request.user})
 
 
 # Updating Data
@@ -64,8 +58,10 @@ def chart_data(request):
         for exp in expense.spending:
             spending = expense.spending[exp]
             names_lst.append(exp)
-            values_lst.append((Decimal(spending["set"])))
-            spent_lst.append((Decimal(spending["limit"]) - Decimal(spending["set"])))
+            values_lst.append(Decimal(spending["set"]))
+            spent_lst.append(Decimal(spending["limit"]) - Decimal(spending["set"]))
+
+
         data = {
             'labels': names_lst,
             'saved': values_lst,
@@ -76,8 +72,6 @@ def chart_data(request):
         }
 
         return JsonResponse(data)
-
-# Getting Transactions Data
 
 
 # Showing all Allowances
@@ -108,16 +102,16 @@ def show(request):
     elif request.method == "POST":
         # Getting Allowance
         allowance = Allowance.objects.filter(user=request.user).last()
-
         # Getting Expense
-        expense_name = request.POST.get('expense_name')
-        expense = Expense.objects.get(allowance=allowance, expense=expense_name)
+        expense = Expense.objects.filter(allowance=allowance).first()
 
         # Getting Values
+        expense_name = request.POST.get('expense_name')
         expense_description = request.POST.get('expense_description')
         expense_amount = request.POST.get('expense_amount')
+
         # Adding Spending Cost
-        #expense.add_entry(expense_description, expense_amount)
+        expense.add_spending(expense_name, expense_description, expense_amount)
 
         return redirect(show)
 
@@ -126,11 +120,12 @@ def show(request):
 def create(request):
     if request.method == "GET":
         allowance = Allowance.objects.filter(user=request.user).last()
+        expense = Expense.objects.filter(allowance=allowance).first()
         # Collecting Forms
         # Getting Previous Allowance Expenses
         if allowance:
             form = AllowanceForm(instance=allowance)
-            form2 = [AllowanceExpenseForm()]
+            form2 = [(AllowanceExpenseForm(data={'name': name, 'limit': data['limit']})) for name, data in expense.spending.items()]
 
         # Creating New Allowance Forms
         else:
@@ -159,6 +154,15 @@ def create(request):
 
 
         return redirect(home)
+
+
+# Edit Expense
+def edit(request):
+    if request.method == "GET":
+        # Getting Allowance & Expense
+        allowance = Allowance.objects.filter(user=request.user).last()
+        expense = Expense.objects.filter(allowance=allowance).first()
+
 
 
 # Settings

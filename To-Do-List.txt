@@ -25,7 +25,7 @@
 
 ----- To-Do List ------
 - Things to Think about
-    
+
     - Plaid Banking worth it? IDK MAYBE
     - Google Sheet Upload Data?
     - Look over Chart.js Data
@@ -45,4 +45,19 @@
 
 - Overview
 
--
+- Edit
+    - Front End
+        - Change everything in Spending to Text fileds?
+        - When Edit is complete can we add a animation?
+
+    - BackEnd
+        - Needs to convert Everything into TextFileds
+        - Needs to Change it in the backend
+
+- Delete
+    - Front End
+        - Pop up Screen to Comfirm
+        - can we add an animation?
+
+    - BackEnd
+        - Delete
